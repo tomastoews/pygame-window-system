@@ -17,3 +17,13 @@ A simple window system for PyGame.
 
 ![Screenshot 7](https://raw.githubusercontent.com/tomastoews/pygame-window-system/main/screenshots/screenshot7.png?raw=true)
 
+![Screenshot 9](https://raw.githubusercontent.com/tomastoews/pygame-window-system/main/screenshots/screenshot9.png?raw=true)
+
+![Screenshot 10](https://raw.githubusercontent.com/tomastoews/pygame-window-system/main/screenshots/screenshot10.png?raw=true)
+
+![Screenshot 11](https://raw.githubusercontent.com/tomastoews/pygame-window-system/main/screenshots/screenshot11.png?raw=true)
+
+![Screenshot 12](https://raw.githubusercontent.com/tomastoews/pygame-window-system/main/screenshots/screenshot12.png?raw=true)
+
+![Screenshot 13](https://raw.githubusercontent.com/tomastoews/pygame-window-system/main/screenshots/screenshot13.png?raw=true)
+
