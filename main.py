@@ -269,7 +269,11 @@ def switch_window_focus():
 def events():
     global windows, focused_window_index, origin_mouse_pos
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit(0)
+            
+        elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 exit(0)
