@@ -9,6 +9,7 @@ pygame.font.init()
 screen_width, screen_height = 1400, 800
 INITIAL_WINDOW_WIDTH = 500
 INITIAL_WINDOW_HEIGHT = 300
+snap_distance = 20
 origin_mouse_pos = None
 
 fps = 60
@@ -61,31 +62,32 @@ class Window(pygame.Rect):
         ]
 
     def move(self):
+        global snap_distance
         mouse_pos = pygame.mouse.get_pos()
         if self.is_fullscreen:
             self.toggle_fullscreen()
-        if mouse_pos[0] <= 40 and mouse_pos[1] <= 40:
+        if mouse_pos[0] <= snap_distance and mouse_pos[1] <= snap_distance:
             self.snap_top_left_corner()
             return None
-        elif mouse_pos[0] >= screen_width-40 and mouse_pos[1] <= 40:
+        elif mouse_pos[0] >= screen_width-snap_distance and mouse_pos[1] <= snap_distance:
             self.snap_top_right_corner()
             return None
-        elif mouse_pos[0] <= 40 and mouse_pos[1] >= screen_height-40:
+        elif mouse_pos[0] <= snap_distance and mouse_pos[1] >= screen_height-snap_distance:
             self.snap_botton_left_corner()
             return None
-        elif mouse_pos[0] >= screen_width-40 and mouse_pos[1] >= screen_height-40:
+        elif mouse_pos[0] >= screen_width-snap_distance and mouse_pos[1] >= screen_height-snap_distance:
             self.snap_botton_right_corner()
             return None
-        elif mouse_pos[0] > 40 and mouse_pos[0] < screen_width-40 and mouse_pos[1] <= 40:
+        elif mouse_pos[0] > snap_distance and mouse_pos[0] < screen_width-snap_distance and mouse_pos[1] <= snap_distance:
             self.snap_top()
             return None
-        elif mouse_pos[0] > 40 and mouse_pos[0] < screen_width-40 and mouse_pos[1] >= screen_height-40:
+        elif mouse_pos[0] > snap_distance and mouse_pos[0] < screen_width-snap_distance and mouse_pos[1] >= screen_height-snap_distance:
             self.snap_bottom()
             return None
-        elif mouse_pos[0] <= 40 and mouse_pos[1] > 40 and mouse_pos[1] < screen_height-40:
+        elif mouse_pos[0] <= snap_distance and mouse_pos[1] > snap_distance and mouse_pos[1] < screen_height-snap_distance:
             self.snap_left()
             return None
-        elif mouse_pos[0] >= screen_width-40 and mouse_pos[1] > 40 and mouse_pos[1] < screen_height-40:
+        elif mouse_pos[0] >= screen_width-snap_distance and mouse_pos[1] > snap_distance and mouse_pos[1] < screen_height-snap_distance:
             self.snap_right()
             return None
         # x_distance = (self.x - mouse_pos[0]) * -1
