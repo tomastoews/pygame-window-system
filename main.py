@@ -88,6 +88,7 @@ class Window(pygame.Rect):
         self.title_text = title_font.render(self.title, False, (255,255,255))
         self.title_bar = pygame.Rect(0,0,0,0)
         self.container = pygame.Rect(0,0,0,0)
+        self.container_surface = pygame.Surface((0,0))
         self.fullscreen_button = pygame.Rect(0,0,0,0)
         self.resize_button = pygame.Rect(0,0,0,0)
         self.lines = []
@@ -258,6 +259,8 @@ class Window(pygame.Rect):
         self.container.width = self.width-(+self.border*2)
         self.container.height = self.height-(self.border*3)-self.title_bar.height
 
+        self.container_surface.__init__((self.container.width-1, self.container.height-1))
+
         self.fullscreen_button.x = self.title_bar.x+self.title_bar.width - self.title_bar_button_height - self.title_bar_height/4
         self.fullscreen_button.y = self.title_bar.y + self.title_bar_button_height - self.title_bar_height/4
         self.fullscreen_button.width = self.title_bar_button_height
@@ -295,16 +298,22 @@ class Window(pygame.Rect):
         screen.fill((0,0,0), rect=self.title_bar)
         screen.fill((0,0,0), rect=self.container)
         screen.fill(self.border_color, rect=self.resize_button)
+        self.container_surface.fill((0,0,0))
 
         for line in self.lines:
             pygame.draw.line(screen, self.border_color, line[0], line[1], 1)
         pygame.draw.rect(screen, self.border_color, self.fullscreen_button, 1)
-
+        
         for i in range(len(self.elements)):
-            screen.blit(self.elements[i], (
-                self.container.x+10,
-                self.container.y+10+i*self.elements[i].get_height()
-            ))
+            self.container_surface.blit(
+                self.elements[i], 
+                (
+                    10,
+                    10+i*self.elements[i].get_height(),
+                )
+            )
+
+        screen.blit(self.container_surface, (self.container.x+1, self.container.y+1))
         screen.blit(self.title_text, (
             (self.title_bar.x+self.title_bar.width/2)-(self.title_text.get_width()/2),
             (self.title_bar.y+self.title_bar.height/2)-(self.title_text.get_height()/2)
