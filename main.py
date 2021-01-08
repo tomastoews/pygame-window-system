@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import random
 import pygame
 import pygame.locals
 
@@ -23,16 +24,60 @@ screen = pygame.display.set_mode(
 title_font = pygame.font.SysFont('Sans Regular', 20)
 font1 = pygame.font.SysFont('Sans Regular', 24)
 
+elements = list()
 windows = list()
 focused_window_index = None
+
+class UIElement(pygame.Rect):
+    def __init__(self, x, y, width, height):
+        super().__init__(self)
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+
+class AddWindowButton(UIElement):
+    def __init__(self, x, y, width, height):
+        super().__init__(x, y, width, height)
+
+    def draw(self):
+        global windows
+        line_width = 2
+        padding = 10
+        pygame.draw.rect(screen, (255,255,255), self, line_width)
+        pygame.draw.line(
+            screen,
+            (255,255,255),
+            ((self.x+self.width/2-line_width/2), (self.y+padding)),
+            ((self.x+self.width/2-line_width/2), (self.y+self.height-padding)),
+            line_width
+        )
+        pygame.draw.line(
+            screen,
+            (255,255,255),
+            ((self.x+padding), (self.y+self.height/2-line_width/2)),
+            ((self.x+self.width-padding), (self.y+self.height/2-line_width/2)),
+            line_width
+        )
+
+    def click_event(self):
+        global windows, focused_window_index, INITIAL_WINDOW_WIDTH, INITIAL_WINDOW_HEIGHT
+        windows.append(Window(
+            x=(screen_width/2)-(INITIAL_WINDOW_WIDTH/2),
+            y=(screen_height/2)-(INITIAL_WINDOW_HEIGHT/2),
+            title=f"Window {len(windows)+1}")
+        )
+        focused_window_index = len(windows)-1
 
 class Window(pygame.Rect):
     def __init__(self, x, y, title):
         super().__init__(self)
+        self.id = str(random.random()).split(".")[1]
         self.is_resizing = False
         self.is_dragging = False
         self.is_fullscreen = False
         self.border = 10
+        self.border_color = (255,255,255)
         self.title_bar_height = 40
         self.title_bar_button_height = 20
         self.title = title
@@ -191,6 +236,7 @@ class Window(pygame.Rect):
         self.update()
 
     def update(self):
+        global windows, focused_window_index
         if self.is_fullscreen:
             self.x = 0
             self.y = 0
@@ -229,19 +275,25 @@ class Window(pygame.Rect):
 
     def draw(self):
         global screen
-        pygame.draw.rect(screen, (255,255,255), self, 1)
-        pygame.draw.rect(screen, (255,255,255), self.title_bar, 1)
-        pygame.draw.rect(screen, (255,255,255), self.container, 1)
-        pygame.draw.rect(screen, (255,255,255), self.resize_button, 1)
+
+        if focused_window_index == None or windows[focused_window_index].id != self.id:
+            self.border_color = (100,100,100)
+        else:
+            self.border_color = (255,255,255)
+
+        pygame.draw.rect(screen, (0,0,0), self, 0)
+        pygame.draw.rect(screen, (0,0,0), self.title_bar, 0)
+        pygame.draw.rect(screen, (0,0,0), self.container, 0)
+        pygame.draw.rect(screen, (0,0,0), self.resize_button, 0)
 
         screen.fill((0,0,0), rect=self)
         screen.fill((0,0,0), rect=self.title_bar)
         screen.fill((0,0,0), rect=self.container)
-        screen.fill((255,255,255), rect=self.resize_button)
+        screen.fill(self.border_color, rect=self.resize_button)
 
         for line in self.lines:
-            pygame.draw.line(screen, (255,255,255), line[0], line[1], 1)
-        pygame.draw.rect(screen, (255,255,255), self.fullscreen_button, 1)
+            pygame.draw.line(screen, self.border_color, line[0], line[1], 1)
+        pygame.draw.rect(screen, self.border_color, self.fullscreen_button, 1)
 
         for i in range(len(self.elements)):
             screen.blit(self.elements[i], (
@@ -255,6 +307,7 @@ class Window(pygame.Rect):
 
 def focus_window(index):
     global windows, focused_window_index
+    print(f"Focused window: {windows[index].title}")
     window = windows[index]
     windows.pop(index)
     windows.append(window)
@@ -291,36 +344,55 @@ def events():
             elif event.key == pygame.K_LEFT:
                 if not focused_window_index == None:
                     windows[focused_window_index].snap_left()
+
         if event.type == pygame.MOUSEMOTION:
             if not focused_window_index == None:
                 if windows[focused_window_index].is_dragging:
                     windows[focused_window_index].move()
                 elif windows[focused_window_index].is_resizing:
                     windows[focused_window_index].resize()
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            windows = windows[::-1]
-            for i in range(len(windows)):
-                if windows[i].collidepoint(mouse_pos):
-                    focus_window(i)
-                    if windows[i].fullscreen_button.collidepoint(mouse_pos):
-                        windows[i].toggle_fullscreen()
-                        break
-                    elif windows[i].title_bar.collidepoint(mouse_pos):
-                        windows[i].is_dragging = True
+            for element in elements:
+                if element.collidepoint(mouse_pos):
+                    element.click_event()
+            reversed_windows = windows[::-1]
+            unfocused_windows = 0
+            for i in range(len(reversed_windows)):
+                normal_index = len(windows)-1-i
+                if reversed_windows[i].collidepoint(mouse_pos):
+                    if normal_index != focused_window_index:
+                        focus_window(normal_index)
+                    if reversed_windows[i].fullscreen_button.collidepoint(mouse_pos):
+                        windows[normal_index].toggle_fullscreen()
+                    elif reversed_windows[i].title_bar.collidepoint(mouse_pos):
+                        windows[normal_index].is_dragging = True
                         origin_mouse_pos = mouse_pos
-                        break
-                    elif windows[i].resize_button.collidepoint(mouse_pos):
-                        windows[i].is_resizing = True
+                    elif reversed_windows[i].resize_button.collidepoint(mouse_pos):
+                        windows[normal_index].is_resizing = True
                         origin_mouse_pos = mouse_pos
-                        break
+                    if normal_index != focused_window_index:
+                        return None
+                    break
+                else:
+                    unfocused_windows = unfocused_windows + 1
+            if unfocused_windows == len(windows):
+                focused_window_index = None
+
         if event.type == pygame.MOUSEBUTTONUP:
-            if not focused_window_index == None:
-                windows[focused_window_index].is_dragging = False
-                windows[focused_window_index].is_resizing = False
+            if focused_window_index is not None:
+                if windows[focused_window_index].is_dragging:
+                    windows[focused_window_index].is_dragging = False
+                    # focused_window_index = None
+                elif windows[focused_window_index].is_resizing:
+                    windows[focused_window_index].is_resizing = False
+                    # focused_window_index = None
 
 def draw():
-    global windows
+    global elements, windows
+    for element in elements:
+        element.draw()
     for window in windows:
         window.draw()
 
@@ -341,8 +413,16 @@ windows[0].elements.append(font1.render("", False, (255,255,255)))
 # windows[0].elements.append(font1.render("Press F12 to toggle fullscreen.", False, (255,255,255)))
 windows[0].elements.append(font1.render("Press ESC to exit the program.", False, (255,255,255)))
 
+focused_window_index = len(windows)-1
+
+elements.append(AddWindowButton(x=screen_width-40*2, y=screen_height-40*2, width=40, height=40))
+
 while True:
     screen.fill((0,0,0))
     events()
     draw()
+    if focused_window_index != None:
+        print(windows[focused_window_index].title)
+    else:
+        print(focused_window_index)
     pygame.display.update()
