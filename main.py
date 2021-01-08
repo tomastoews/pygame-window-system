@@ -282,7 +282,7 @@ class Window(pygame.Rect):
         global screen
 
         if focused_window_index == None or windows[focused_window_index].id != self.id:
-            self.border_color = (100,100,100)
+            self.border_color = (155,155,155)
         else:
             self.border_color = (255,255,255)
 
