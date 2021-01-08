@@ -154,14 +154,19 @@ class Window(pygame.Rect):
         self.update()
 
     def resize(self):
-        # TODO: Fix minimum resize dimensions issue
+        mouse_pos = pygame.mouse.get_pos()
+        next_width = mouse_pos[0] - self.x
+        next_height = mouse_pos[1] - self.y
         if self.is_fullscreen:
             self.is_fullscreen = False
-        mouse_pos = pygame.mouse.get_pos()
-        if self.width >= 200:
+        if next_width >= 200:
             self.width = mouse_pos[0] - self.x
-        if self.height >= 200:
+        else:
+            self.width = 200
+        if next_height >= 200:
             self.height = mouse_pos[1] - self.y
+        else:
+            self.height = 200
         self.update()
 
     def toggle_fullscreen(self):
@@ -421,8 +426,4 @@ while True:
     screen.fill((0,0,0))
     events()
     draw()
-    if focused_window_index != None:
-        print(windows[focused_window_index].title)
-    else:
-        print(focused_window_index)
     pygame.display.update()
