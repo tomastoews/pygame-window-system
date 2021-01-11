@@ -7,18 +7,24 @@ import pygame.locals
 pygame.init()
 pygame.font.init()
 
-screen_width, screen_height = 1400, 800
+INFO = pygame.display.Info()
+SCREEN_WIDTH_SMALL = 1400
+SCREEN_HEIGHT_SMALL = 500
+SCREEN_WIDTH_FULL = INFO.current_w
+SCREEN_HEIGHT_FULL = INFO.current_h
+screen_width = SCREEN_WIDTH_FULL
+screen_height = SCREEN_HEIGHT_FULL
 INITIAL_WINDOW_WIDTH = 500
 INITIAL_WINDOW_HEIGHT = 300
+
 snap_distance = 20
 origin_mouse_pos = None
-
 fps = 60
 pygame.mouse.set_visible(True)
 pygame.display.init()
 screen = pygame.display.set_mode(
     size=(screen_width, screen_height),
-    #flags=pygame.FULLSCREEN
+    flags=pygame.FULLSCREEN
 )
 
 title_font = pygame.font.SysFont('Sans Regular', 20)
@@ -321,7 +327,6 @@ class Window(pygame.Rect):
 
 def focus_window(index):
     global windows, focused_window_index
-    print(f"Focused window: {windows[index].title}")
     window = windows[index]
     windows.pop(index)
     windows.append(window)
@@ -342,8 +347,6 @@ def events():
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 exit(0)
-            #elif event.key == pygame.K_F12:
-            #    pygame.display.toggle_fullscreen()
             elif event.key == pygame.K_TAB:
                 switch_window_focus()
             elif event.key == pygame.K_UP:
