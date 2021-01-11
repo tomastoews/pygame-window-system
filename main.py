@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import time
 import random
 import pygame
 import pygame.locals
@@ -89,6 +90,7 @@ class Window(pygame.Rect):
         self.title = title
         self.x = x
         self.y = y
+        self.cursor_distance = None
         self.width = INITIAL_WINDOW_WIDTH+(self.border*3)
         self.height = INITIAL_WINDOW_HEIGHT+(self.border*2)
         self.title_text = title_font.render(self.title, False, (255,255,255))
@@ -112,6 +114,13 @@ class Window(pygame.Rect):
             # Rectangle right
             ((rectangle.x+rectangle.width, rectangle.y), (rectangle.x+rectangle.width, rectangle.y+rectangle.height))
         ]
+
+    def set_cursor_distance(self, mouse_pos):
+        x = (self.x - mouse_pos[0]) * -1
+        y = (self.y - mouse_pos[1]) * -1
+        if x < 0: x = x * -1
+        if y < 0: y = y * -1
+        self.cursor_distance = (x,y)
 
     def move(self):
         global snap_distance
@@ -142,23 +151,21 @@ class Window(pygame.Rect):
         elif mouse_pos[0] >= screen_width-snap_distance and mouse_pos[1] > snap_distance and mouse_pos[1] < screen_height-snap_distance:
             self.snap_right()
             return None
-        # x_distance = (self.x - mouse_pos[0]) * -1
-        # y_distance = (self.y - mouse_pos[1]) * -1
-        x = mouse_pos[0] - (self.width/2)
-        y = mouse_pos[1] - (self.border+self.title_bar.height/2)
-        # print(f"Mouse: {mouse_pos[0]}, Window: {x}, Distance: {x_distance}")
-        # print(f"Distance: {x_distance}")
-        self.boxed_x = 0
-        self.boxed_y = 0
-        self.boxed_width = 0
-        self.boxed_height = 0
-        self.x = x
-        self.y = y
-        self.title_bar.x = x
-        self.title_bar.y = y
-        self.container.x = x
-        self.container.y = self.title_bar.height
-        self.update()
+        if self.cursor_distance is not None and self.cursor_distance[0] < (self.title_bar.width) and self.cursor_distance[1] < (self.title_bar.height):
+            # print(self.cursor_distance)
+            x = mouse_pos[0] - self.cursor_distance[0]
+            y = mouse_pos[1] - self.cursor_distance[1]
+            self.boxed_x = 0
+            self.boxed_y = 0
+            self.boxed_width = 0
+            self.boxed_height = 0
+            self.x = x
+            self.y = y
+            self.title_bar.x = x
+            self.title_bar.y = y
+            self.container.x = x
+            self.container.y = self.title_bar.height
+            self.update()
 
     def resize(self):
         mouse_pos = pygame.mouse.get_pos()
@@ -385,6 +392,7 @@ def events():
                         windows[normal_index].toggle_fullscreen()
                     elif reversed_windows[i].title_bar.collidepoint(mouse_pos):
                         windows[normal_index].is_dragging = True
+                        windows[normal_index].set_cursor_distance(mouse_pos)
                         origin_mouse_pos = mouse_pos
                     elif reversed_windows[i].resize_button.collidepoint(mouse_pos):
                         windows[normal_index].is_resizing = True
@@ -399,6 +407,7 @@ def events():
 
         if event.type == pygame.MOUSEBUTTONUP:
             if focused_window_index is not None:
+                windows[focused_window_index].cursor_distance = None
                 if windows[focused_window_index].is_dragging:
                     windows[focused_window_index].is_dragging = False
                     # focused_window_index = None
