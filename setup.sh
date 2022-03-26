@@ -1,3 +1,4 @@
 #!/bin/bash
 
-pip3 install pygame tkinter
+pipenv install pygame
+
